@@ -1,4 +1,8 @@
-package user
+package user_test
+
+import (
+	"deeply/service/user"
+)
 
 import (
 	"bytes"
@@ -13,8 +17,8 @@ import (
 )
 
 func TestUserServiceHandlers(t *testing.T){
-	userStore := &mockUserStore{}
-	handler := NewHandler(userStore)
+	userStore := newMockUserStore()
+	handler := user.NewHandler(userStore)
 
 	t.Run("should fail if the user payload is invalid", func(t *testing.T){
 		payload := types.RegisterUserPayload{
@@ -34,7 +38,7 @@ func TestUserServiceHandlers(t *testing.T){
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
-		router.HandleFunc("/register", handler.handleRegister)
+		router.HandleFunc("/register", handler.HandleRegister)
 		router.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusBadRequest{
@@ -60,7 +64,7 @@ func TestUserServiceHandlers(t *testing.T){
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
-		router.HandleFunc("/register", handler.handleRegister)
+		router.HandleFunc("/register", handler.HandleRegister)
 		router.ServeHTTP(rr, req)
 
 		if rr.Code != http.StatusCreated{
@@ -68,16 +72,24 @@ func TestUserServiceHandlers(t *testing.T){
 		}
 	})
 }
-type mockUserStore struct{
+type mockUserStore struct {
+	users map[string]*types.User
+}
 
-
+func newMockUserStore() *mockUserStore {
+	return &mockUserStore{
+		users: make(map[string]*types.User),
+	}
 }
 
 type User struct {
 	Email string
 }
 
-func (m *mockUserStore) GetUserByEmail (email string) (*types.User, error) {
+func (m *mockUserStore) GetUserByEmail(email string) (*types.User, error) {
+	if user, ok := m.users[email]; ok {
+		return user, nil
+	}
 	return nil, fmt.Errorf("user not found")
 }
 
@@ -85,6 +97,7 @@ func (m *mockUserStore) GetUserByID (id int) (*types.User, error) {
 	return nil, nil
 }
 
-func (m *mockUserStore) CreateUser (types.User) error {
+func (m *mockUserStore) CreateUser(user types.User) error {
+	m.users[user.Email] = &user
 	return nil
 }

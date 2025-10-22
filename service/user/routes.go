@@ -20,31 +20,34 @@ func NewHandler(store types.UserStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/login", h.handleLogin).Methods("POST")
-	router.HandleFunc("/register", h.handleRegister).Methods("POST")
+	router.HandleFunc("/login", h.HandleLogin).Methods("POST")
+	router.HandleFunc("/register", h.HandleRegister).Methods("POST")
 }
 
-func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	// get JSON payload
 	var payload types.RegisterUserPayload
-	if err := utils.ParseJSON(r, payload); err != nil {
+	if err := utils.ParseJSON(r, &payload); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
+		return
 	}
 
 	// validate the payload
 	if err := utils.Validate.Struct(payload); err != nil {
 		error := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload &v", error))
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", error))
+		return
 	}
 
 	// check if the user exists
 	_, err := h.store.GetUserByEmail(payload.Email)
 	if err == nil {
-		utils.WriteError(w, http.StatusBadGateway, fmt.Errorf("user with email %s already exists", payload.Email))
+		utils.WriteError(w, http.StatusConflict, fmt.Errorf("user with email %s already exists", payload.Email))
+		return
 	}
 
 	hashedPassword, err := auth.HashPassword(payload.Password)
