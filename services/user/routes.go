@@ -1,7 +1,7 @@
 package user
 
 import (
-	"deeply/service/auth"
+	"deeply/services/auth"
 	"deeply/types"
 	"deeply/utils"
 	"fmt"
@@ -46,7 +46,7 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	// check if the user exists
 	_, err := h.store.GetUserByEmail(payload.Email)
 	if err == nil {
-		utils.WriteError(w, http.StatusConflict, fmt.Errorf("user with email %s already exists", payload.Email))
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", payload.Email))
 		return
 	}
 

@@ -2,7 +2,7 @@ package api
 
 import (
 	"database/sql"
-	"deeply/service/user"
+	"deeply/services/user"
 	"log"
 	"net/http"
 

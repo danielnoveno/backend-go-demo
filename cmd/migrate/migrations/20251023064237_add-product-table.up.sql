@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS `products` (
     `quantity` INT UNSIGNED NOT NULL,
     `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (`id`),
+    PRIMARY KEY (`id`)
 )

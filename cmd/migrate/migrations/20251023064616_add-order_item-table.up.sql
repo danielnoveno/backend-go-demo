@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS `order_items` (
     `price` DECIMAL (18, 2) NOT NULL,
 
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`orderId`) REFERENCES orders(`id`)
+    FOREIGN KEY (`orderId`) REFERENCES orders(`id`),
     FOREIGN KEY (`productId`) REFERENCES products(`id`)
 )

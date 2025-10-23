@@ -1,11 +1,8 @@
 package user_test
 
 import (
-	"deeply/service/user"
-)
-
-import (
 	"bytes"
+	"deeply/services/user"
 	"deeply/types"
 	"encoding/json"
 	"fmt"
