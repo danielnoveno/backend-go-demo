@@ -1,17 +1,17 @@
-# Define the name of your Go application executable
-APP_NAME := deeply
+build: 
+	@go build -o cmd/main.go
 
-# Define the main Go source file
-MAIN_GO_FILE := main.go
+test:
+	@go test -v ./...
 
-# Target to build the Go application
-build:
-	go build -o $(APP_NAME) $(MAIN_GO_FILE)
-
-# Target to run the Go application
 run: build
-	./$(APP_NAME)
+	@./bin/ecom
 
-# Target to clean up the built executable
-clean:
-	rm -f $(APP_NAME)
+migrateion:
+	@migrate create -ext sql -dir cmd/migrate/migrateion $(filter-out $@, $(MAKECMDGOALS))
+
+migrate-up:
+	@go run cmd/migrate/main.go up
+
+migrate-down:
+	@go run cmd/migrate/mian.go down
