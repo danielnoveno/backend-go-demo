@@ -1,11 +1,7 @@
-package user_test
+package user
 
 import (
-	"bytes"
-	"deeply/services/user"
 	"deeply/types"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,21 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func TestUserServiceHandlers(t *testing.T){
-	userStore := newMockUserStore()
-	handler := user.NewHandler(userStore)
+func TestUserServiceHandlers(t *testing.T) {
+	userStore := &mockUserStore{}
+	handler := NewHandler(userStore)
 
-	t.Run("should fail if the user payload is invalid", func(t *testing.T){
-		payload := types.RegisterUserPayload{
-			FirstName: "user",
-			LastName: "123",
-			Email: "123",
-			Password: "password",
-		}
-
-		marshalled, _ := json.Marshal(payload)
-
-		req, err := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(marshalled))
+	t.Run("should fail if the user ID is not a number", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, "/user/abc", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -35,25 +22,17 @@ func TestUserServiceHandlers(t *testing.T){
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
-		router.HandleFunc("/register", handler.HandleRegister)
+		router.HandleFunc("/user/{userID}", handler.handleGetUser).Methods(http.MethodGet)
+
 		router.ServeHTTP(rr, req)
 
-		if rr.Code != http.StatusBadRequest{
+		if rr.Code != http.StatusBadRequest {
 			t.Errorf("expected status code %d, got %d", http.StatusBadRequest, rr.Code)
 		}
 	})
 
-	t.Run("should correctly register the user", func(t *testing.T) {
-		payload := types.RegisterUserPayload{
-			FirstName: "user",
-			LastName: "123",
-			Email: "123@gmail.com",
-			Password: "password",
-		}
-
-		marshalled, _ := json.Marshal(payload)
-
-		req, err := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(marshalled))
+	t.Run("should handle get user by ID", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, "/user/42", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -61,40 +40,30 @@ func TestUserServiceHandlers(t *testing.T){
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
-		router.HandleFunc("/register", handler.HandleRegister)
+		router.HandleFunc("/user/{userID}", handler.handleGetUser).Methods(http.MethodGet)
+
 		router.ServeHTTP(rr, req)
 
-		if rr.Code != http.StatusCreated{
-			t.Errorf("expected status code %d, got %d", http.StatusCreated, rr.Code)
+		if rr.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, rr.Code)
 		}
 	})
 }
-type mockUserStore struct {
-	users map[string]*types.User
-}
 
-func newMockUserStore() *mockUserStore {
-	return &mockUserStore{
-		users: make(map[string]*types.User),
-	}
-}
+type mockUserStore struct{}
 
-type User struct {
-	Email string
+func (m *mockUserStore) UpdateUser(u types.User) error {
+	return nil
 }
 
 func (m *mockUserStore) GetUserByEmail(email string) (*types.User, error) {
-	if user, ok := m.users[email]; ok {
-		return user, nil
-	}
-	return nil, fmt.Errorf("user not found")
+	return &types.User{}, nil
 }
 
-func (m *mockUserStore) GetUserByID (id int) (*types.User, error) {
-	return nil, nil
-}
-
-func (m *mockUserStore) CreateUser(user types.User) error {
-	m.users[user.Email] = &user
+func (m *mockUserStore) CreateUser(u types.User) error {
 	return nil
+}
+
+func (m *mockUserStore) GetUserByID(id int) (*types.User, error) {
+	return &types.User{}, nil
 }
