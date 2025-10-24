@@ -55,13 +55,12 @@ type UserStore interface {
 }
 
 type ProductStore interface {
-	// GetProductByID(id int) (*Product, error)
-	// GetProductsByID(ids []int) ([]Product, error)
-	// GetProducts() ([]*Product, error)
-	// CreateProduct(CreateProductPayload) error
-	// UpdateProduct(Product) error
-	GetProducts() ([]Product, error)
-} 
+	GetProductByID(id int) (*Product, error)
+	GetProductsByID(ids []int) ([]Product, error)
+	GetProducts() ([]*Product, error)
+	CreateProduct(CreateProductPayload) error
+	UpdateProduct(Product) error
+}
 
 type OrderStore interface {
 	CreateOrder(Order) (int, error)
