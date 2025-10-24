@@ -1,17 +1,17 @@
-build: 
-	@go build -o cmd/main.go
+build:
+	@go build -o bin/main cmd/main.go
 
 test:
 	@go test -v ./...
-
+	
 run: build
-	@./bin/ecom
+	@./bin/main
 
-migrateion:
-	@migrate create -ext sql -dir cmd/migrate/migrateion $(filter-out $@, $(MAKECMDGOALS))
+migration:
+	@migrate create -ext sql -dir cmd/migrate/migrations $(filter-out $@,$(MAKECMDGOALS))
 
 migrate-up:
 	@go run cmd/migrate/main.go up
 
 migrate-down:
-	@go run cmd/migrate/mian.go down
+	@go run cmd/migrate/main.go down

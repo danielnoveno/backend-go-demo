@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"deeply/services/products"
 	"deeply/services/user"
 	"log"
 	"net/http"
@@ -28,6 +29,10 @@ func (s *APIServer) Run () error {
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter) 
+
+	productStore := products.NewStore(s.db)
+	productHandler := products.NewHandler(productStore)
+	productHandler.RegisterRoutes(subRouter)
 
 	log.Println("Listening on", s.addr)
 	
